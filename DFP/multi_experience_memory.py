@@ -10,6 +10,7 @@ from matplotlib import gridspec
 import time
 import os
 from . import util as my_util
+from cv2 import VideoWriter,VideoWriter_fourcc
 
 class MultiExperienceMemory:
 
@@ -282,7 +283,7 @@ class MultiExperienceMemory:
         return total_avg_meas, total_avg_rwrd
             
             
-    def show(self, start_index=0, end_index=None, display=True, write_imgs=False, write_video = False, preprocess_targets=None, show_predictions=0, net_discrete_actions = []):
+    def show(self, start_index=0, end_index=None, display=False, write_imgs=False, write_video = True, preprocess_targets=None, show_predictions=0, net_discrete_actions = []):
         if show_predictions:
             assert(hasattr(self,'_predictions'))
         curr_index = start_index
@@ -294,7 +295,7 @@ class MultiExperienceMemory:
             prev_time = time.time()
         if write_video:
             print(self.img_shape)
-            vw = VideoWriter('vid.avi', (self.img_shape[2],self.img_shape[1]), framerate=24, rgb=(self.img_shape[0]==3), mode='replace')
+            vw = VideoWriter('vid.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=(self.img_shape[0]==3))
         print('Press ENTER to go to the next observation, type "quit" or "q" or "exit" and press ENTER to quit')
 
         if display or write_imgs:
@@ -309,7 +310,11 @@ class MultiExperienceMemory:
                 action_labels.append(''.join(str(int(i)) for i in act))
                 
         while True:
+            time.sleep(0.05)
             curr_img = np.transpose(self._images[curr_index], (1,2,0))
+            # plt.imshow(curr_img[:,:,0])
+            # plt.show()
+
             if curr_img.shape[2] == 1:
                 curr_img = np.tile(curr_img, (1,1,3))
             if show_predictions:
@@ -341,7 +346,7 @@ class MultiExperienceMemory:
                     print('Wrote %d images' % ns)
                     prev_time = time.time()
             if write_video:
-                vw.add_frame(curr_img[:,:,0])
+                vw.write(curr_img[:,:,0])
             if display:
                 fig_img.canvas.draw()
                 if show_predictions:
@@ -351,12 +356,12 @@ class MultiExperienceMemory:
                 print('Rewards:', self._rewards[curr_index])
                 print('Action:', self._actions[curr_index])
                 print('Terminal:', self._terminals[curr_index])
-                inp = input()
+                # inp = input()
                 
             curr_index = (curr_index + 1) % self.capacity
-            if curr_index == end_index:
+            if curr_index == 1400:
                 if write_video:
-                    vw.close()
+                    vw.release()
                 break
             if inp == 'q' or inp == 'quit' or inp == 'exit':
                 break
