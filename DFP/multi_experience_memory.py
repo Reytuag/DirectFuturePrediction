@@ -11,6 +11,7 @@ import time
 import os
 from . import util as my_util
 from cv2 import VideoWriter,VideoWriter_fourcc
+import cv2
 
 class MultiExperienceMemory:
 
@@ -284,6 +285,7 @@ class MultiExperienceMemory:
             
             
     def show(self, start_index=0, end_index=None, display=False, write_imgs=False, write_video = True, preprocess_targets=None, show_predictions=0, net_discrete_actions = []):
+        
         if show_predictions:
             assert(hasattr(self,'_predictions'))
         curr_index = start_index
@@ -296,6 +298,9 @@ class MultiExperienceMemory:
         if write_video:
 
               vw = VideoWriter('vid.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=(self.img_shape[0]==3))
+              if(self.img_shape[0]==2):
+                vwseg = VideoWriter('vidseg.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=(self.img_shape[0]==2))
+                cm = plt.get_cmap('tab20')
         print('Press ENTER to go to the next observation, type "quit" or "q" or "exit" and press ENTER to quit')
 
         if display or write_imgs:
@@ -326,13 +331,12 @@ class MultiExperienceMemory:
                 
             if curr_index == start_index:
                 if display or write_imgs:
-                  if self.img_shape[0]==1:
-                    im = ax_img.imshow(curr_img)
+                  if self.img_shape[0]==2:
+                    im = ax_img.imshow(curr_img[:,:,1])
                     txt = ax_img.text(self.img_shape[2] - 10*len(self._measurements[curr_index]) , self.img_shape[1] - 5, str(self._measurements[curr_index]), fontsize=20, color='red')
                   else:
-                    im = ax_img.imshow(curr_img[:,:,0])
+                    im = ax_img.imshow(curr_img)
                     txt = ax_img.text(self.img_shape[2] - 10*len(self._measurements[curr_index]) , self.img_shape[1] - 5, str(self._measurements[curr_index]), fontsize=20, color='red')
-
                 if show_predictions:
                     all_objs = np.sum(self._predictions, axis=2)
                     sbp = my_util.StackedBarPlot(curr_preds, ylim=[np.min(all_objs), np.max(all_objs)], labels=curr_labels)
@@ -341,7 +345,7 @@ class MultiExperienceMemory:
                         sbp.show()
             else:
                 if display or write_imgs:
-                  if self.img_shape[0]==0:
+                  if self.img_shape[0]==1:
                     im.set_data(curr_img)
                     txt.set_text(str(self._measurements[curr_index]))
                   else:
@@ -356,6 +360,9 @@ class MultiExperienceMemory:
                     prev_time = time.time()
             if write_video:
                 vw.write(curr_img[:,:,0])
+                if(self.img_shape[0]==2):
+                  colored_image = (cm(curr_img[:,:,1]/255)*255)[:,:,:3].astype(np.uint8)
+                  vwseg.write(colored_image)
             if display:
                 fig_img.canvas.draw()
                 if show_predictions:
@@ -371,6 +378,8 @@ class MultiExperienceMemory:
             if curr_index == 300:
                 if write_video:
                     vw.release()
+                    if(self.img_shape[0]==2):
+                      vwseg.release()
                 break
             if inp == 'q' or inp == 'quit' or inp == 'exit':
                 break
