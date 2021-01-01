@@ -51,6 +51,9 @@ class DoomSimulator:
         elif self.color_mode == 'GRAY':
             self._game.set_screen_format(vizdoom.ScreenFormat.GRAY8)
             self.num_channels = 1
+        elif self.color_mode == 'GRAYSEG':
+            self._game.set_screen_format(vizdoom.ScreenFormat.GRAY8)
+            self.num_channels = 2
         else:
             print("Unknown color mode")
             raise
