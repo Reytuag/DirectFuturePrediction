@@ -294,8 +294,8 @@ class MultiExperienceMemory:
             os.makedirs('imgs')
             prev_time = time.time()
         if write_video:
-            print(self.img_shape)
-            vw = VideoWriter('vid.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=(self.img_shape[0]==3))
+
+              vw = VideoWriter('vid.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=(self.img_shape[0]==3))
         print('Press ENTER to go to the next observation, type "quit" or "q" or "exit" and press ENTER to quit')
 
         if display or write_imgs:
@@ -326,8 +326,13 @@ class MultiExperienceMemory:
                 
             if curr_index == start_index:
                 if display or write_imgs:
+                  if self.img_shape[0]==1:
                     im = ax_img.imshow(curr_img)
                     txt = ax_img.text(self.img_shape[2] - 10*len(self._measurements[curr_index]) , self.img_shape[1] - 5, str(self._measurements[curr_index]), fontsize=20, color='red')
+                  else:
+                    im = ax_img.imshow(curr_img[:,:,0])
+                    txt = ax_img.text(self.img_shape[2] - 10*len(self._measurements[curr_index]) , self.img_shape[1] - 5, str(self._measurements[curr_index]), fontsize=20, color='red')
+
                 if show_predictions:
                     all_objs = np.sum(self._predictions, axis=2)
                     sbp = my_util.StackedBarPlot(curr_preds, ylim=[np.min(all_objs), np.max(all_objs)], labels=curr_labels)
@@ -336,7 +341,11 @@ class MultiExperienceMemory:
                         sbp.show()
             else:
                 if display or write_imgs:
+                  if self.img_shape[0]==0:
                     im.set_data(curr_img)
+                    txt.set_text(str(self._measurements[curr_index]))
+                  else:
+                    im.set_data(curr_img[:,:,1])
                     txt.set_text(str(self._measurements[curr_index]))
                 if show_predictions:
                     sbp.set_data(curr_preds, labels = curr_labels)
@@ -359,7 +368,7 @@ class MultiExperienceMemory:
                 # inp = input()
                 
             curr_index = (curr_index + 1) % self.capacity
-            if curr_index == 1400:
+            if curr_index == 300:
                 if write_video:
                     vw.release()
                 break
