@@ -44,6 +44,7 @@ class DoomSimulator:
             self._game.set_screen_resolution(getattr(vizdoom.ScreenResolution, 'RES_160X120'))
             self.resize = True
 
+
         # set color mode
         if self.color_mode == 'RGB':
             self._game.set_screen_format(vizdoom.ScreenFormat.CRCGCB)
@@ -119,6 +120,9 @@ class DoomSimulator:
                 raw_img = state.screen_buffer
             elif self.color_mode == 'GRAY':
                 raw_img = np.expand_dims(state.screen_buffer,0)
+            elif self.color_mode == 'GRAYSEG':
+                raw_img = np.expand_dims(state.screen_buffer,0) 
+                raw_seg=np.expand_dims(state.labels_buffer,0)
                 
             if self.resize:
                 if self.num_channels == 1:
@@ -126,11 +130,22 @@ class DoomSimulator:
                         img = None
                     else:
                         img = cv2.resize(raw_img[0], (self.resolution[0], self.resolution[1]))[None,:,:]
+                elif self.num_channels==2:
+                  if raw_img is None or (isinstance(raw_img, list) and raw_img[0] is None):
+                        img = None
+                  else:
+                        imgbis = cv2.resize(raw_img[0], (self.resolution[0], self.resolution[1]))[None,:,:]
+                        seg =cv2.resize(raw_seg[0],(self.resolution[0], self.resolution[1]))[None,:,:]
+                        img=np.concatenate((imgbis,seg))
+
                 else:
                     raise NotImplementedError('not implemented for non-Grayscale images')
             else:
                 img = raw_img
-                
+                if self.num_channels==2:
+                  seg=raw_seg
+                  img=np.concatenate((img,seg))
+            
             meas = state.game_variables # this is a numpy array of game variables specified by the scenario
             
         term = self._game.is_episode_finished() or self._game.is_player_dead()
