@@ -300,7 +300,8 @@ class MultiExperienceMemory:
               vw = VideoWriter('vid.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=(self.img_shape[0]==3))
               if(self.img_shape[0]==2):
                 vwseg = VideoWriter('vidseg.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=(self.img_shape[0]==2))
-                cm = plt.get_cmap('tab20')
+                # cm = plt.get_cmap('hot')
+                cm = plt.get_cmap('Pastel2')
         print('Press ENTER to go to the next observation, type "quit" or "q" or "exit" and press ENTER to quit')
 
         if display or write_imgs:
@@ -362,7 +363,7 @@ class MultiExperienceMemory:
                 vw.write(curr_img[:,:,0])
                 if(self.img_shape[0]==2):
                   colored_image = (cm(curr_img[:,:,1]/255)*255)[:,:,:3].astype(np.uint8)
-                  vwseg.write(colored_image)
+                  vwseg.write(colored_image[:,:,::-1])
             if display:
                 fig_img.canvas.draw()
                 if show_predictions:
