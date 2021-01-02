@@ -12,7 +12,7 @@ import os
 from . import util as my_util
 from cv2 import VideoWriter,VideoWriter_fourcc
 import cv2
-
+from collections import Counter
 class MultiExperienceMemory:
 
     def __init__(self, args, multi_simulator = None, target_maker = None):
@@ -301,7 +301,7 @@ class MultiExperienceMemory:
               if(self.img_shape[0]==2):
                 vwseg = VideoWriter('vidseg.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=(self.img_shape[0]==2))
                 # cm = plt.get_cmap('hot')
-                cm = plt.get_cmap('Pastel2')
+                cm = plt.get_cmap('hot')
         print('Press ENTER to go to the next observation, type "quit" or "q" or "exit" and press ENTER to quit')
 
         if display or write_imgs:
@@ -362,7 +362,16 @@ class MultiExperienceMemory:
             if write_video:
                 vw.write(curr_img[:,:,0])
                 if(self.img_shape[0]==2):
-                  colored_image = (cm(curr_img[:,:,1]/255)*255)[:,:,:3].astype(np.uint8)
+                  # a=np.random.randint(4,80)
+                  # b=np.random.randint(4,80)
+                  
+                  img_bis=curr_img[:,:,1]
+                  # print(img_bis[a-3:a+3,b-3:b+3])
+                  img_bis=img_bis+np.equal(img_bis,1)*35
+                  img_bis=img_bis-np.equal(img_bis,255)*40
+                  img_bis=img_bis-np.equal(img_bis,246)*100
+                  img_bis=img_bis-np.equal(img_bis,206)*100
+                  colored_image = (cm((img_bis/255))*255)[:,:,:3].astype(np.uint8)
                   vwseg.write(colored_image[:,:,::-1])
             if display:
                 fig_img.canvas.draw()
