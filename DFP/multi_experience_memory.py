@@ -284,7 +284,7 @@ class MultiExperienceMemory:
         return total_avg_meas, total_avg_rwrd
             
             
-    def show(self, start_index=0, end_index=None, display=False, write_imgs=False, write_video = True, preprocess_targets=None, show_predictions=0, net_discrete_actions = []):
+    def show(self, start_index=0, end_index=None, display=False, write_imgs=False, write_video = True, preprocess_targets=None, show_predictions=0, net_discrete_actions = [],make_dataset=True):
         
         if show_predictions:
             assert(hasattr(self,'_predictions'))
@@ -383,9 +383,12 @@ class MultiExperienceMemory:
                 print('Action:', self._actions[curr_index])
                 print('Terminal:', self._terminals[curr_index])
                 # inp = input()
-                
+            if make_dataset:
+              if curr_index%100==0:
+                cv2.imwrite("img/%.5d.png" % curr_index,curr_img[:,:,0])
+                cv2.imwrite("imgSeg/%.5d.png" % curr_index,curr_img[:,:,1])
             curr_index = (curr_index + 1) % self.capacity
-            if curr_index == 300:
+            if curr_index == 16000:
                 if write_video:
                     vw.release()
                     if(self.img_shape[0]==2):
