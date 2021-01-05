@@ -385,8 +385,8 @@ class MultiExperienceMemory:
                 # inp = input()
             if make_dataset:
               if curr_index%100==0:
-                cv2.imwrite("img/%.5d.png" % curr_index,curr_img[:,:,0])
-                cv2.imwrite("imgSeg/%.5d.png" % curr_index,curr_img[:,:,1])
+                cv2.imwrite("img/%.5d.png" % (curr_index//100),curr_img[:,:,0])
+                cv2.imwrite("imgSeg/%.5d.png" % (curr_index//100),curr_img[:,:,1])
             curr_index = (curr_index + 1) % self.capacity
             if curr_index == 16000:
                 if write_video:
