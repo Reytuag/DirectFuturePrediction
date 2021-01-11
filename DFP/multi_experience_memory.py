@@ -295,13 +295,16 @@ class MultiExperienceMemory:
         if write_imgs:
             os.makedirs('imgs')
             prev_time = time.time()
+        if make_dataset:
+          train_img=[]
+          train_label=[]
         if write_video:
 
               vw = VideoWriter('vid.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=(self.img_shape[0]==3))
               if(self.img_shape[0]==2):
                 vwseg = VideoWriter('vidseg.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=(self.img_shape[0]==2))
                 # cm = plt.get_cmap('hot')
-                cm = plt.get_cmap('hot')
+                cm = plt.get_cmap('jet')
         print('Press ENTER to go to the next observation, type "quit" or "q" or "exit" and press ENTER to quit')
 
         if display or write_imgs:
@@ -369,8 +372,7 @@ class MultiExperienceMemory:
                   # print(img_bis[a-3:a+3,b-3:b+3])
                   img_bis=img_bis+np.equal(img_bis,1)*35
                   img_bis=img_bis-np.equal(img_bis,255)*40
-                  img_bis=img_bis-np.equal(img_bis,246)*100
-                  img_bis=img_bis-np.equal(img_bis,206)*100
+        
                   colored_image = (cm((img_bis/255))*255)[:,:,:3].astype(np.uint8)
                   vwseg.write(colored_image[:,:,::-1])
             if display:
@@ -384,15 +386,19 @@ class MultiExperienceMemory:
                 print('Terminal:', self._terminals[curr_index])
                 # inp = input()
             if make_dataset:
-              if curr_index%100==0:
-                cv2.imwrite("img/%.5d.png" % (curr_index//100),curr_img[:,:,0])
-                cv2.imwrite("imgSeg/%.5d.png" % (curr_index//100),curr_img[:,:,1])
+              if curr_index%5==0:
+                train_img.append(curr_img[:,:,0])
+                train_label.append(curr_img[:,:,1])
             curr_index = (curr_index + 1) % self.capacity
             if curr_index == 16000:
                 if write_video:
                     vw.release()
                     if(self.img_shape[0]==2):
                       vwseg.release()
+
+                if make_dataset:
+                  np.save("train.data",np.array(train_img))
+                  np.save("label.data",np.array(train_label))
                 break
             if inp == 'q' or inp == 'quit' or inp == 'exit':
                 break
