@@ -12,6 +12,7 @@ import os
 from . import util as my_util
 from cv2 import VideoWriter,VideoWriter_fourcc
 import cv2
+from tensorflow.keras.models import model_from_json
 from collections import Counter
 class MultiExperienceMemory:
 
@@ -284,7 +285,7 @@ class MultiExperienceMemory:
         return total_avg_meas, total_avg_rwrd
             
             
-    def show(self, start_index=0, end_index=None, display=False, write_imgs=False, write_video = True, preprocess_targets=None, show_predictions=0, net_discrete_actions = [],make_dataset=True):
+    def show(self, start_index=0, end_index=None, display=False, write_imgs=False, write_video = True, preprocess_targets=None, show_predictions=0, net_discrete_actions = [],make_dataset=False,showLabelPred=True):
         
         if show_predictions:
             assert(hasattr(self,'_predictions'))
@@ -305,6 +306,17 @@ class MultiExperienceMemory:
                 vwseg = VideoWriter('vidseg.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=(self.img_shape[0]==2))
                 # cm = plt.get_cmap('hot')
                 cm = plt.get_cmap('jet')
+              if(showLabelPred):
+                vwsegpred=VideoWriter('vidsegpred.avi',VideoWriter_fourcc(*'MP4V'), frameSize=(self.img_shape[2],self.img_shape[1]), fps=24, isColor=True)
+                cm = plt.get_cmap('jet')
+                # load json and create model
+                json_file = open('model.json', 'r')
+                loaded_model_json = json_file.read()
+                json_file.close()
+                model = model_from_json(loaded_model_json)
+                # load weights into new model
+                model.load_weights("model.h5")
+                print("Loaded model from disk")
         print('Press ENTER to go to the next observation, type "quit" or "q" or "exit" and press ENTER to quit')
 
         if display or write_imgs:
@@ -370,11 +382,20 @@ class MultiExperienceMemory:
                   
                   img_bis=curr_img[:,:,1]
                   # print(img_bis[a-3:a+3,b-3:b+3])
-                  img_bis=img_bis+np.equal(img_bis,1)*35
-                  img_bis=img_bis-np.equal(img_bis,255)*40
+                  img_bis=img_bis+np.equal(img_bis,1)*79
         
                   colored_image = (cm((img_bis/255))*255)[:,:,:3].astype(np.uint8)
                   vwseg.write(colored_image[:,:,::-1])
+                if(showLabelPred):
+
+                  pred=(model.predict(curr_img[:,:,0].reshape(1,84,84,1)/255))
+                  
+                  color_img=(cm(pred[0,:,:,0])*255)[:,:,:3].astype(np.uint8)
+                  color_img=np.array(color_img)   
+                            
+                  vwsegpred.write(color_img[:,:,::-1])
+
+
             if display:
                 fig_img.canvas.draw()
                 if show_predictions:
@@ -392,7 +413,7 @@ class MultiExperienceMemory:
             curr_index = (curr_index + 1) % self.capacity
 
 
-            if curr_indx== 16000-1600:
+            if curr_index== 16000-1600:
                 if make_dataset:
                   np.save("train.data",np.array(train_img))
                   np.save("label.data",np.array(train_label))
@@ -403,7 +424,8 @@ class MultiExperienceMemory:
                     vw.release()
                     if(self.img_shape[0]==2):
                       vwseg.release()
-
+                    if(showLabelPred):
+                      vwsegpred.release()
                 if make_dataset:
                   np.save("val.data",np.array(train_img))
                   np.save("vallabel.data",np.array(train_label))
