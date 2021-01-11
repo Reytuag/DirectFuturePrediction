@@ -4,8 +4,9 @@ from .future_target_maker import FutureTargetMaker
 from .multi_doom_simulator import MultiDoomSimulator
 from .multi_experience_memory import MultiExperienceMemory
 from .future_predictor_agent_basic import FuturePredictorAgentBasic
-from .future_predictor_agent_advantage import FuturePredictorAgentAdvantage
+
 from .future_predictor_agent_advantage_nonorm import FuturePredictorAgentAdvantageNoNorm
+from .future_predictor_agent_pred import FuturePredictorAgentAdvantagePred
 from . import defaults
 import tensorflow as tf
 import scipy.misc
@@ -98,6 +99,8 @@ class MultiExperiment:
             self.ag = FuturePredictorAgentAdvantage(self.sess, agent_args) # inital design: concat meas and img, then 2 branches for adv and val
         elif self.agent_type == 'advantage_nonorm':
             self.ag = FuturePredictorAgentAdvantageNoNorm(self.sess, agent_args) # no normalizatio in the advantage stream
+        elif self.agent_type == 'advantage_pred':
+            self.ag = FuturePredictorAgentAdvantagePred(self.sess, agent_args) # seg prediction
         else:
             raise Exception('Unknown agent type', self.agent_type)
         
