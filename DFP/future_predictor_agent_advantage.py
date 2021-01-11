@@ -9,6 +9,7 @@ from . import tf_ops as my_ops
 import os
 import re
 from .agent import Agent
+from tensorflow.keras.models import model_from_json
 
 class FuturePredictorAgentAdvantage(Agent):
     
@@ -19,7 +20,22 @@ class FuturePredictorAgentAdvantage(Agent):
         self.fc_val_params['out_dims'][-1] = self.target_dim
         self.fc_adv_params = np.copy(self.fc_joint_params)
         self.fc_adv_params['out_dims'][-1] = len(self.net_discrete_actions) * self.target_dim
+        
+        # # load json and create model
+        # json_file = open('model.json', 'r')
+        # loaded_model_json = json_file.read()
+        # json_file.close()
+        # self.segment_model = model_from_json(loaded_model_json)
+        # # load weights into new model
+        # self.segment_model.load_weights("model.h5")
+        # print("Loaded model from disk")
+        # self.segment_model.trainable=False
+
+        # input_images=tf.concat([input_images,self.segment_model(input_images)],axis=0)
+
+        # self.conv_params[0]=2
         self.p_img_conv = my_ops.conv_encoder(input_images, self.conv_params, 'p_img_conv', msra_coeff=0.9)
+
         p_img_fc = my_ops.fc_net(my_ops.flatten(self.p_img_conv), self.fc_img_params, 'p_img_fc', msra_coeff=0.9)
         p_meas_fc = my_ops.fc_net(input_measurements, self.fc_meas_params, 'p_meas_fc', msra_coeff=0.9)
         if isinstance(self.fc_obj_params, np.ndarray):
