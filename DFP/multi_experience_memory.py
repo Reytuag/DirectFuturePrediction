@@ -390,6 +390,14 @@ class MultiExperienceMemory:
                 train_img.append(curr_img[:,:,0])
                 train_label.append(curr_img[:,:,1])
             curr_index = (curr_index + 1) % self.capacity
+
+
+            if curr_indx== 16000-1600:
+                if make_dataset:
+                  np.save("train.data",np.array(train_img))
+                  np.save("label.data",np.array(train_label))
+                  train_img=[]
+                  train_label=[]
             if curr_index == 16000:
                 if write_video:
                     vw.release()
@@ -397,8 +405,8 @@ class MultiExperienceMemory:
                       vwseg.release()
 
                 if make_dataset:
-                  np.save("train.data",np.array(train_img))
-                  np.save("label.data",np.array(train_label))
+                  np.save("val.data",np.array(train_img))
+                  np.save("vallabel.data",np.array(train_label))
                 break
             if inp == 'q' or inp == 'quit' or inp == 'exit':
                 break
