@@ -55,6 +55,9 @@ class DoomSimulator:
         elif self.color_mode == 'GRAYSEG':
             self._game.set_screen_format(vizdoom.ScreenFormat.GRAY8)
             self.num_channels = 2
+        elif self.color_mode == 'GRAYSEGPRED':
+            self._game.set_screen_format(vizdoom.ScreenFormat.GRAY8)
+            self.num_channels = 1
         else:
             print("Unknown color mode")
             raise
@@ -123,6 +126,8 @@ class DoomSimulator:
             elif self.color_mode == 'GRAYSEG':
                 raw_img = np.expand_dims(state.screen_buffer,0) 
                 raw_seg=np.expand_dims(state.labels_buffer,0)
+            elif self.color_mode == 'GRAYSEGPRED':
+                raw_img = np.expand_dims(state.screen_buffer,0) 
                 
             if self.resize:
                 if self.num_channels == 1:
