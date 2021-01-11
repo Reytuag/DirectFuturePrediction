@@ -413,13 +413,13 @@ class MultiExperienceMemory:
             curr_index = (curr_index + 1) % self.capacity
 
 
-            if curr_index== 16000-1600:
+            if curr_index== 400-160:
                 if make_dataset:
                   np.save("train.data",np.array(train_img))
                   np.save("label.data",np.array(train_label))
                   train_img=[]
                   train_label=[]
-            if curr_index == 16000:
+            if curr_index == 400:
                 if write_video:
                     vw.release()
                     if(self.img_shape[0]==2):
