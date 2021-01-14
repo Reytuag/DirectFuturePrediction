@@ -4,7 +4,7 @@ from .future_target_maker import FutureTargetMaker
 from .multi_doom_simulator import MultiDoomSimulator
 from .multi_experience_memory import MultiExperienceMemory
 from .future_predictor_agent_basic import FuturePredictorAgentBasic
-
+from .future_predictor_agent_advantage import FuturePredictorAgentAdvantage
 from .future_predictor_agent_advantage_nonorm import FuturePredictorAgentAdvantageNoNorm
 from .future_predictor_agent_pred import FuturePredictorAgentAdvantagePred
 from . import defaults
